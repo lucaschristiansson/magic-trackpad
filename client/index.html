@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Magic Trackpad</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+    <style>
+        body { 
+            margin: 0; background: #121212; color: white; display: flex; 
+            flex-direction: column; height: 100vh; overflow: hidden; 
+            font-family: sans-serif; user-select: none;
+        }
+        #trackpad { 
+            flex-grow: 1; background: #2a2a2a; margin: 20px; 
+            border-radius: 20px; display: flex; justify-content: center; 
+            align-items: center; border: 2px solid #555; font-size: 24px; 
+        }
+        .buttons { 
+            display: flex; height: 100px; margin: 0 20px 20px 20px; gap: 20px; 
+        }
+        .btn { 
+            flex: 1; background: #333; border-radius: 15px; border: 2px solid #555; 
+            display: flex; justify-content: center; align-items: center; 
+            font-size: 20px; font-weight: bold; cursor: pointer;
+        }
+        .btn:active { background: #555; }
+    </style>
+</head>
+<body>
+    <div id="trackpad">Touch & Drag Here</div>
+    
+    <div class="buttons">
+        <div class="btn" id="left-click">Left Click</div>
+        <div class="btn" id="right-click">Right Click</div>
+    </div>
+
+    <script>
+        const socket = io();
+        const trackpad = document.getElementById('trackpad');
+        const leftBtn = document.getElementById('left-click');
+        const rightBtn = document.getElementById('right-click');
+        
+        let lastX = 0, lastY = 0;
+
+        trackpad.addEventListener('touchstart', (e) => {
+            lastX = e.touches[0].clientX;
+            lastY = e.touches[0].clientY;
+        });
+
+        trackpad.addEventListener('touchmove', (e) => {
+            e.preventDefault(); 
+            let currentX = e.touches[0].clientX;
+            let currentY = e.touches[0].clientY;
+            
+            let dx = (currentX - lastX) * 1.8;
+            let dy = (currentY - lastY) * 1.8;
+            
+            socket.emit('move', { dx: dx, dy: dy });
+            
+            lastX = currentX;
+            lastY = currentY;
+        }, { passive: false });
+
+        leftBtn.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            socket.emit('click', { button: 'left' });
+        });
+
+        rightBtn.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            socket.emit('click', { button: 'right' });
+        });
+    </script>
+</body>
+</html>

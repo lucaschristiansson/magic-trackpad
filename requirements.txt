@@ -1,0 +1,6 @@
+Flask==3.0.2
+Flask-SocketIO==5.3.6
+PyAutoGUI==0.9.54
+pytest==8.0.0
+flake8==7.0.0
+qrcode==7.4.2
