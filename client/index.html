@@ -41,25 +41,49 @@
         const rightBtn = document.getElementById('right-click');
         
         let lastX = 0, lastY = 0;
+        let lastScrollY = 0;
 
         trackpad.addEventListener('touchstart', (e) => {
-            lastX = e.touches[0].clientX;
-            lastY = e.touches[0].clientY;
+            if(e.touches.length === 1){
+                lastX = e.touches[0].clientX;
+                lastY = e.touches[0].clientY;
+            } else if(e.touches.length === 2){
+                lastScrollY = e.touches[0].clientY
+            }
         });
 
         trackpad.addEventListener('touchmove', (e) => {
-            e.preventDefault(); 
-            let currentX = e.touches[0].clientX;
-            let currentY = e.touches[0].clientY;
-            
-            let dx = (currentX - lastX) * 1.8;
-            let dy = (currentY - lastY) * 1.8;
-            
-            socket.emit('move', { dx: dx, dy: dy });
-            
-            lastX = currentX;
-            lastY = currentY;
+            e.preventDefault();
+
+            if (e.touches.length === 1) {
+                let currentX = e.touches[0].clientX;
+                let currentY = e.touches[0].clientY;
+                
+                let dx = (currentX - lastX) * 1.8;
+                let dy = (currentY - lastY) * 1.8;
+                
+                socket.emit('move', { dx: dx, dy: dy });
+                
+                lastX = currentX;
+                lastY = currentY;
+                
+            } else if (e.touches.length === 2) {
+                let currentScrollY = e.touches[0].clientY;
+                
+                let dy = currentScrollY - lastScrollY;
+                
+                socket.emit('scroll', { dy: dy });
+                
+                lastScrollY = currentScrollY;
+            }
         }, { passive: false });
+
+        trackpad.addEventListener('touchend', (e) => {
+            if (e.touches.length === 1) {
+                lastX = e.touches[0].clientX;
+                lastY = e.touches[0].clientY;
+            }
+        });
 
         leftBtn.addEventListener('touchstart', (e) => {
             e.preventDefault();
